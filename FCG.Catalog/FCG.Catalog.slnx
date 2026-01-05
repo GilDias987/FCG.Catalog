@@ -1,0 +1,25 @@
+<Solution>
+  <Folder Name="/document/" />
+  <Folder Name="/src/" />
+  <Folder Name="/src/Application/">
+    <Project Path="FCG.Catalog.Application.Dto/FCG.Catalog.Application.Dto.csproj" />
+    <Project Path="FCG.Catalog.Application.Interface/FCG.Catalog.Application.Interface.csproj" />
+    <Project Path="FCG.Catalog.Application.UseCases/FCG.Catalog.Application.UseCases.csproj" />
+  </Folder>
+  <Folder Name="/src/Domain/">
+    <Project Path="FCG.Catalog.Domain/FCG.Catalog.Domain.csproj" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/">
+    <Project Path="FCG.Catalog.Infrastructure/FCG.Catalog.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/">
+    <Project Path="FCG.Catalog.WebAPI/FCG.Catalog.WebAPI.csproj" />
+  </Folder>
+  <Folder Name="/test/" />
+  <Folder Name="/test/Application/">
+    <Project Path="FCG.Catalog.Application.Test/FCG.Catalog.Application.Test.csproj" />
+  </Folder>
+  <Folder Name="/test/Domain/">
+    <Project Path="FCG.Catalog.Domain.Test/FCG.Catalog.Domain.Test.csproj" />
+  </Folder>
+</Solution>
