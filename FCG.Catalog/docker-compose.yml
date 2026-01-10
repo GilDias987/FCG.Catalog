@@ -1,0 +1,39 @@
+services:
+  catalog-api:
+    build:
+      context: .
+      dockerfile: FCG.Catalog.WebAPI/Dockerfile
+    container_name: catalog-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings=Server=sqlserver;Database=FCGCatalog;User Id=sa;Password=Your_password123;TrustServerCertificate=True
+      - Jwt__Issuer=fcg-catalog
+      - Jwt__Key=super_secret_dev_key_change_me
+    ports:
+      - "8080:8080"
+    depends_on:
+      - sqlserver
+      - rabbitmq
+    networks:
+      - fcg-net
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server
+    container_name: fcg-catalog-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=pass@123
+    ports:
+      - "1433:1433"
+    networks:
+      - fcg-net
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+  
+volumes:
+  sqlserver-data:
+
+networks:
+  fcg-net:
+    driver: bridge

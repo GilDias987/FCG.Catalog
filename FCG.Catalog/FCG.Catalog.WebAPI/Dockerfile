@@ -7,7 +7,6 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-
 # Esta fase é usada para compilar o projeto de serviço
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -15,6 +14,8 @@ WORKDIR /src
 COPY ["FCG.Catalog.WebAPI/FCG.Catalog.WebAPI.csproj", "FCG.Catalog.WebAPI/"]
 RUN dotnet restore "./FCG.Catalog.WebAPI/FCG.Catalog.WebAPI.csproj"
 COPY . .
+
+RUN ls -la
 WORKDIR "/src/FCG.Catalog.WebAPI"
 RUN dotnet build "./FCG.Catalog.WebAPI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
