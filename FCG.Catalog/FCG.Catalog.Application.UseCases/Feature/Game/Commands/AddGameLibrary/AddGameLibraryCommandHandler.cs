@@ -20,7 +20,7 @@ namespace FCG.Catalog.Application.UseCases.Feature.Game.Commands.AddGameLibrary
         public async Task<bool> Handle(AddGameLibraryCommand request, CancellationToken cancellationToken)
         {
             try
-            {
+            { 
                 await _userGameRepository.AddAsync(new Domain.Entities.UserGame(request.UserId, request.GameId));
                 return true;
             }
