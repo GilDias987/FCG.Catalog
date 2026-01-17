@@ -15,7 +15,7 @@ namespace FCG.Catalog.Application.UseCases.Feature.Game.Commands.AddGame
             _genderRepository = genderRepository;
             _plataformRepository = plataformRepository;
 
-            RuleFor(c => c.Tittle).NotEmpty().WithMessage("Informe o título.");
+            RuleFor(c => c.Title).NotEmpty().WithMessage("Informe o título.");
 
             RuleFor(c => c.Price)
                 .Must((model, context) =>

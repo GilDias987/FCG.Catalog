@@ -8,5 +8,6 @@ namespace FCG.Catalog.Application.Interface.Repository
 {
     public interface IUserGameRepository : IRepository<UserGame>
     {
+        Task<UserGame?> GetUserGameIdAsync(int userId, int gameId);
     }
 }
