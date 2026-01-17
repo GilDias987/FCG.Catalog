@@ -49,7 +49,7 @@ namespace FCG.Catalog.WebAPI.Controllers
             return NotFound();
         }
 
-        [HttpGet("Get{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
             var plataform = await _mediator.Send(new GetPlataformQuery { Id = id });
