@@ -2,6 +2,7 @@
 using FCG.Catalog.Application.UseCases.Feature.Game.Commands.DeleteGame;
 using FCG.Catalog.Application.UseCases.Feature.Game.Commands.EditGame;
 using FCG.Catalog.Application.UseCases.Feature.Game.Commands.LinkDiscountGame;
+using FCG.Catalog.Application.UseCases.Feature.Game.Commands.RequestPurchaseGame;
 using FCG.Catalog.Application.UseCases.Feature.Game.Queries.GetAllGame;
 using FCG.Catalog.Application.UseCases.Feature.Game.Queries.GetGame;
 using MediatR;
@@ -12,6 +13,7 @@ namespace FCG.Catalog.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "ADMINISTRADOR")]
     public class GameController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -85,7 +87,7 @@ namespace FCG.Catalog.WebAPI.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("Get{id}")]
+        [HttpGet("{id}")]
         [Authorize]
         public async Task<IActionResult> Get(int id)
         {
@@ -103,6 +105,19 @@ namespace FCG.Catalog.WebAPI.Controllers
         public async Task<IActionResult> GetAll()
         {
             var game = await _mediator.Send(new GetAllGameQuery());
+
+            return Ok(game);
+        }
+
+        /// <summary>
+        /// Pedido para Comprar o Jogo
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("RequestPaymentGame")]
+        [Authorize]
+        public async Task<IActionResult> RequestPaymentGame([FromBody] RequestPurchaseGameCommand requestPurchaseGameCommand)
+        {
+            var game = await _mediator.Send(requestPurchaseGameCommand);
 
             return Ok(game);
         }

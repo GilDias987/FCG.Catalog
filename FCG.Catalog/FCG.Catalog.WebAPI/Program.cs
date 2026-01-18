@@ -1,11 +1,15 @@
 using FCG.Catalog.Application.Interface.Repository;
+using FCG.Catalog.Application.UseCases.Handler;
 using FCG.Catalog.Application.UseCases.Registration;
+using FCG.Catalog.Application.UseCases.Service;
 using FCG.Catalog.Infrastructure.Context;
 using FCG.Catalog.Infrastructure.Repository;
 using FCG.Catalog.WebAPI.Middleware;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Net.Http.Headers;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -70,6 +74,7 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<IPlataformRepository, PlataformRepository>();
 builder.Services.AddScoped<IGenderRepository, GenderRepository>();
+builder.Services.AddScoped<IUserGameRepository, UserGameRepository>();
 #endregion
 
 
@@ -81,6 +86,7 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("ADMINISTRADOR", policy => policy.RequireRole("ADMINISTRADOR"));
 });
+
 
 var app = builder.Build();
 

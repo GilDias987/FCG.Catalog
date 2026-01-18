@@ -23,7 +23,7 @@ namespace FCG.Catalog.Application.UseCases.Feature.Game.Commands.AddGame
         public async Task<GameDto> Handle(AddGameCommand request, CancellationToken cancellationToken)
         {
 
-            var objGame = await _gameRepository.AddAsync(new Domain.Entities.Game(request.Tittle, request.Description, request.Price, request.Discount, request.GenderId, request.PlatformId));
+            var objGame = await _gameRepository.AddAsync(new Domain.Entities.Game(request.Title, request.Description, request.Price, request.Discount, request.GenderId, request.PlatformId));
 
             var dtoGame = new GameDto()
             {

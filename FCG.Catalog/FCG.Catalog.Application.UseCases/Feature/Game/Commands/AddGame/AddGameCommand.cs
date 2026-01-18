@@ -8,7 +8,7 @@ namespace FCG.Catalog.Application.UseCases.Feature.Game.Commands.AddGame
 {
     public class AddGameCommand : IRequest<GameDto>
     {
-        public required string Tittle { get; set; }
+        public required string Title { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
         public decimal? Discount { get; set; }
