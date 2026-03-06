@@ -19,5 +19,12 @@ namespace FCG.Catalog.Infrastructure.Repository
         {
             return await _dbSet.FirstOrDefaultAsync(g => g.UserId == userId && g.GameId == gameId);
         }
+
+        public async Task<List<UserGame>> ListUserGameAsync(int userId)
+        {
+            return await _dbSet
+                .Include(i => i.Game)
+                .Where(g => g.UserId == userId).ToListAsync();
+        }
     }
 }
