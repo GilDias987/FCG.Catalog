@@ -4,6 +4,7 @@ using FCG.Catalog.Application.UseCases.Feature.Game.Commands.EditGame;
 using FCG.Catalog.Application.UseCases.Feature.Game.Commands.LinkDiscountGame;
 using FCG.Catalog.Application.UseCases.Feature.Game.Commands.RequestPurchaseGame;
 using FCG.Catalog.Application.UseCases.Feature.Game.Queries.GetAllGame;
+using FCG.Catalog.Application.UseCases.Feature.Game.Queries.GetAllUserGames;
 using FCG.Catalog.Application.UseCases.Feature.Game.Queries.GetGame;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -110,6 +111,19 @@ namespace FCG.Catalog.WebAPI.Controllers
         }
 
         /// <summary>
+        /// Listar jogos da Biblioteca do Usuário
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("UsersGameLibrary/{userId}")]
+        [Authorize]
+        public async Task<IActionResult> UsersGameLibrary(int userId)
+        {
+            var games = await _mediator.Send(new GetAllUserGamesQuery { UserId = userId});
+
+            return Ok(games);
+        }
+
+        /// <summary>
         /// Pedido para Comprar o Jogo
         /// </summary>
         /// <returns></returns>
@@ -121,5 +135,7 @@ namespace FCG.Catalog.WebAPI.Controllers
 
             return Ok(game);
         }
+
+ 
     }
 }
