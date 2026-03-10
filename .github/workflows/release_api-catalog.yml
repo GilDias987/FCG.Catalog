@@ -27,7 +27,7 @@ jobs:
         run: dotnet build --configuration Release FCG.Catalog/FCG.Catalog.slnx
 
       - name: dotnet publish
-        run: dotnet publish FCG.Catalog/FCG.Catalog/FCG.Catalog.WebAPI.csproj -c Release -o "${{env.DOTNET_ROOT}}/FCG.Catalog"
+        run: dotnet publish FCG.Catalog/FCG.Catalog.WebAPI.csproj -c Release -o "${{env.DOTNET_ROOT}}/FCG.Catalog"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -54,4 +54,5 @@ jobs:
           package: .
 
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_5DD2E9FDFD5A4E9DAEFB1561E62F27E1 }}
+
 
