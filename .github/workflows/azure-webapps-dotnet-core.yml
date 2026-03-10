@@ -22,12 +22,15 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.x'
+          
+      - name: List files
+        run: dir
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/FCG.Catalog"
+        run: dotnet publish ./src/FCG.Catalog/FCG.Catalog.csproj -c Release -o "${{env.DOTNET_ROOT}}/FCG.Catalog"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
