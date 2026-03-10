@@ -24,13 +24,13 @@ jobs:
           dotnet-version: '10.x'
           
       - name: List files
-        run: dir ./FCG.Catalog
+        run: dir ./FCG.Catalog/FCG.Catalog.WebAPI
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release
+        run: dotnet build --configuration Release ./FCG.Catalog/FCG.Catalog.slnx
 
       - name: dotnet publish
-        run: dotnet publish ./FCG.Catalog/FCG.Catalog.WebAPI.csproj -c Release -o "${{env.DOTNET_ROOT}}/FCG.Catalog"
+        run: dotnet publish ./FCG.Catalog/FCG.Catalog.WebAPI/FCG.Catalog.WebAPI.csproj -c Release -o "${{env.DOTNET_ROOT}}/FCG.Catalog"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
