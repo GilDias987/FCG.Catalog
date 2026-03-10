@@ -1,9 +1,6 @@
 ﻿using FCG.Catalog.Application.Dto.Game;
 using FCG.Catalog.Application.Interface.Repository;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FCG.Catalog.Application.UseCases.Feature.Game.Commands.AddGame
 {
@@ -22,7 +19,6 @@ namespace FCG.Catalog.Application.UseCases.Feature.Game.Commands.AddGame
 
         public async Task<GameDto> Handle(AddGameCommand request, CancellationToken cancellationToken)
         {
-
             var objGame = await _gameRepository.AddAsync(new Domain.Entities.Game(request.Title, request.Description, request.Price, request.Discount, request.GenderId, request.PlatformId));
 
             var dtoGame = new GameDto()
