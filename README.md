@@ -29,7 +29,7 @@ Para que a aplicação funcione corretamente, edite o arquivo `appsettings.Devel
 ```json
 {
   "ConnectionStrings": {
-    "ConnectionStrings": "Server=catalog-sqlserver,1433;Initial Catalog=db_fcg_catalog;Persist Security Info=False;User ID=sa;Password=pass@123;Encrypt=False;Pooling=True;TrustServerCertificate=True"
+    "ConnectionStrings": "Server=catalog-sqlserver,1433;Initial Catalog=db_fcg_catalog;Persist Security Info=False; User ID=sa;Password=pass@123;Encrypt=False;Pooling=True;TrustServerCertificate=True"
   },
   "Logging": {
     "LogLevel": {
