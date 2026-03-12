@@ -40,6 +40,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(sqlConn);
 });
+
 #region [JWT]
 
 builder.Services.AddAuthentication(options =>
@@ -88,11 +89,11 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseOpenApi();
     app.UseSwaggerUI();
-}
+//}
 
 app.UseHttpsRedirection();
 
