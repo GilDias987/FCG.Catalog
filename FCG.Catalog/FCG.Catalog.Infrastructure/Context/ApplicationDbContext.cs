@@ -11,6 +11,7 @@ namespace FCG.Catalog.Infrastructure.Context
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
+            {}
 
         #region DbSet
 
