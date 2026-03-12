@@ -1,15 +1,12 @@
 using FCG.Catalog.Application.Interface.Repository;
-using FCG.Catalog.Application.UseCases.Handler;
 using FCG.Catalog.Application.UseCases.Registration;
-using FCG.Catalog.Application.UseCases.Service;
 using FCG.Catalog.Infrastructure.Context;
 using FCG.Catalog.Infrastructure.Repository;
+using FCG.Catalog.WebAPI.Configurations;
 using FCG.Catalog.WebAPI.Middleware;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Net.Http.Headers;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +14,9 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
     .Build();
+
+// Configura o Serilog para ler o appsettings.json
+builder.AddSerilogLogging();
 
 // Add services to the container.
 
@@ -106,5 +106,11 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseExceptionHandler();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();
