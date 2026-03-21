@@ -1,4 +1,5 @@
 using FCG.Catalog.Application.Interface.Repository;
+using FCG.Catalog.Application.UseCases.Interceptor;
 using FCG.Catalog.Application.UseCases.Registration;
 using FCG.Catalog.Infrastructure.Context;
 using FCG.Catalog.Infrastructure.Repository;
@@ -36,9 +37,12 @@ builder.Services.AddOpenApiDocument(options =>
 });
 
 var sqlConn = builder.Configuration.GetConnectionString("ConnectionStrings");
-builder.Services.AddDbContext<ApplicationDbContext>(options => 
+builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddScoped<AuditInterceptor>();
+builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 {
     options.UseSqlServer(sqlConn);
+    options.AddInterceptors(sp.GetRequiredService<AuditInterceptor>());
 });
 
 #region [JWT]
@@ -75,10 +79,7 @@ builder.Services.AddScoped<IGenderRepository, GenderRepository>();
 builder.Services.AddScoped<IUserGameRepository, UserGameRepository>();
 #endregion
 
-
-builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddProblemDetails();
-
 
 builder.Services.AddAuthorization(options =>
 {
