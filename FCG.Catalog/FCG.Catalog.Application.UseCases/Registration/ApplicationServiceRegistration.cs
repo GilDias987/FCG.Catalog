@@ -1,4 +1,5 @@
-﻿using FCG.Catalog.Application.UseCases.Behaviour;
+﻿using FCG.Catalog.Application.Interface.Service;
+using FCG.Catalog.Application.UseCases.Behaviour;
 using FCG.Catalog.Application.UseCases.Feature.Game.Consumers;
 using FCG.Catalog.Application.UseCases.Handler;
 using FCG.Catalog.Application.UseCases.Service;
@@ -23,8 +24,8 @@ namespace FCG.Catalog.Application.UseCases.Registration
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
             services.AddMediatR(Assembly.GetExecutingAssembly());
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-
             services.AddHttpContextAccessor();
+            services.AddScoped<IUserService, UserService>();
             services.AddTransient<AuthenticationHandler>();
 
             // HttpClient configurado
