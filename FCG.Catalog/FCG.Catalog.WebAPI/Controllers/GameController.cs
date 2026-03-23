@@ -161,7 +161,5 @@ namespace FCG.Catalog.WebAPI.Controllers
 
             return Ok(game);
         }
-
- 
     }
 }
