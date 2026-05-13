@@ -16,8 +16,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddLogging();
 
 // Add services to the container.
-
 builder.Services.AddControllers();
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApiDocument(options =>
 {
@@ -103,6 +103,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.UseExceptionHandler();
 
