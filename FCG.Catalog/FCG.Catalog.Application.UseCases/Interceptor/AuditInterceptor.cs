@@ -1,11 +1,6 @@
 ﻿using FCG.Catalog.Application.Interface.Service;
-using FCG.Catalog.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json;
 
 namespace FCG.Catalog.Application.UseCases.Interceptor
 {
@@ -29,68 +24,68 @@ namespace FCG.Catalog.Application.UseCases.Interceptor
 
         private void AddAuditLogs(DbContext context)
         {
-            if (context == null) return;
+            //if (context == null) return;
 
-            var auditLogs = new List<AuditLog>();
+            //var auditLogs = new List<AuditLog>();
 
-            foreach (var entry in context.ChangeTracker.Entries())
-            {
-                if (entry.Entity is AuditLog ||
-                    entry.State == EntityState.Detached ||
-                    entry.State == EntityState.Unchanged)
-                    continue;
+            //foreach (var entry in context.ChangeTracker.Entries())
+            //{
+            //    if (entry.Entity is AuditLog ||
+            //        entry.State == EntityState.Detached ||
+            //        entry.State == EntityState.Unchanged)
+            //        continue;
 
-                var audit = new AuditLog
-                {
-                    TableName = entry.Metadata.GetTableName(),
-                    Action = entry.State.ToString(),
-                    Timestamp = DateTime.UtcNow,
-                    UserId = _userService.GetUserId()
-                };
+            //    var audit = new AuditLog
+            //    {
+            //        TableName = entry.Metadata.GetTableName(),
+            //        Action = entry.State.ToString(),
+            //        Timestamp = DateTime.UtcNow,
+            //        UserId = _userService.GetUserId()
+            //    };
 
-                var keyValues = new Dictionary<string, object>();
-                var oldValues = new Dictionary<string, object>();
-                var newValues = new Dictionary<string, object>();
+            //    var keyValues = new Dictionary<string, object>();
+            //    var oldValues = new Dictionary<string, object>();
+            //    var newValues = new Dictionary<string, object>();
 
-                foreach (var prop in entry.Properties)
-                {
-                    var name = prop.Metadata.Name;
+            //    foreach (var prop in entry.Properties)
+            //    {
+            //        var name = prop.Metadata.Name;
 
-                    if (prop.Metadata.IsPrimaryKey())
-                    {
-                        keyValues[name] = prop.CurrentValue;
-                        audit.EntityId = prop.CurrentValue?.ToString();
-                        continue;
-                    }
+            //        if (prop.Metadata.IsPrimaryKey())
+            //        {
+            //            keyValues[name] = prop.CurrentValue;
+            //            audit.EntityId = prop.CurrentValue?.ToString();
+            //            continue;
+            //        }
 
-                    switch (entry.State)
-                    {
-                        case EntityState.Added:
-                            newValues[name] = prop.CurrentValue;
-                            break;
+            //        switch (entry.State)
+            //        {
+            //            case EntityState.Added:
+            //                newValues[name] = prop.CurrentValue;
+            //                break;
 
-                        case EntityState.Deleted:
-                            oldValues[name] = prop.OriginalValue;
-                            break;
+            //            case EntityState.Deleted:
+            //                oldValues[name] = prop.OriginalValue;
+            //                break;
 
-                        case EntityState.Modified:
-                            if (prop.IsModified)
-                            {
-                                oldValues[name] = prop.OriginalValue;
-                                newValues[name] = prop.CurrentValue;
-                            }
-                            break;
-                    }
-                }
+            //            case EntityState.Modified:
+            //                if (prop.IsModified)
+            //                {
+            //                    oldValues[name] = prop.OriginalValue;
+            //                    newValues[name] = prop.CurrentValue;
+            //                }
+            //                break;
+            //        }
+            //    }
 
-                audit.KeyValues = JsonSerializer.Serialize(keyValues);
-                audit.OldValues = JsonSerializer.Serialize(oldValues);
-                audit.NewValues = JsonSerializer.Serialize(newValues);
+            //    audit.KeyValues = JsonSerializer.Serialize(keyValues);
+            //    audit.OldValues = JsonSerializer.Serialize(oldValues);
+            //    audit.NewValues = JsonSerializer.Serialize(newValues);
 
-                auditLogs.Add(audit);
-            }
+            //    auditLogs.Add(audit);
+            //}
 
-            context.Set<AuditLog>().AddRange(auditLogs);
+            //context.Set<AuditLog>().AddRange(auditLogs);
         }
     }
 }
