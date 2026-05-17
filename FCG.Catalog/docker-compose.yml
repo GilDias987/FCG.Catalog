@@ -1,39 +1,21 @@
 services:
-  catalog-api:
-    build:
-      context: .
-      dockerfile: FCG.Catalog.WebAPI/Dockerfile
-    container_name: catalog-api
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings=Server=sqlserver;Database=FCGCatalog;User Id=sa;Password=Your_password123;TrustServerCertificate=True
-      - Jwt__Issuer=fcg-catalog
-      - Jwt__Key=super_secret_dev_key_change_me
-    ports:
-      - "8080:8080"
-    depends_on:
-      - sqlserver
-      - rabbitmq
-    networks:
-      - fcg-net
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.0
+    container_name: elasticsearch
 
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server
-    container_name: fcg-catalog-sqlserver
     environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=pass@123
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=Carlos@987
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - xpack.license.self_generated.type=basic
+
     ports:
-      - "1433:1433"
-    networks:
-      - fcg-net
+      - "9200:9200"
+      - "9300:9300"
+
     volumes:
-      - sqlserver-data:/var/opt/mssql
-  
-volumes:
-  sqlserver-data:
+      - elastic_data:/usr/share/elasticsearch/data
 
-networks:
-  fcg-net:
-    driver: bridge
+volumes:
+  elastic_data:

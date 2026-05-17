@@ -1,61 +1,129 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: catalog-api-deployment
+  name: catalogapi
+  namespace: fcg-prod
   labels:
-    app: catalog-api
+    app: catalogapi
 spec:
-  replicas: 1
+  replicas: 2
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
   selector:
     matchLabels:
-      app: catalog-api
+      app: catalogapi
+
   template:
     metadata:
       labels:
-        app: catalog-api
+        app: catalogapi
     spec:
+      # ✅ Volume CSI para Key Vault
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: kv-fcg-prod-253
+
       containers:
-        - name: catalog-api
-          image: catalog-api:latest
+        - name: catalogapi
+          image: acrfcgprod.azurecr.io/catalogapi:__TAG__
           imagePullPolicy: IfNotPresent
+
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8080
+
+          # ✅ Monta o volume CSI (sem isso, o CSI não injeta nada)
+          volumeMounts:
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+
+          # ✅ Variáveis necessárias (como você listou)
           env:
             - name: ASPNETCORE_ENVIRONMENT
               value: "Development"
+
+            - name: PATH_BASE
+              value: "/catalog"
+
             - name: ASPNETCORE_URLS
               value: "http://+:8080"
-            - name: ConnectionStrings__DefaultConnection
+
+            - name: ConnectionStrings__ConnectionStrings
               valueFrom:
                 secretKeyRef:
                   name: catalog-api-secret
-                  key: connectionString
+                  key: CONNECTIONSTRINGS__CONNECTIONSTRINGS
+
             - name: Jwt__Issuer
               valueFrom:
                 secretKeyRef:
                   name: catalog-api-secret
-                  key: jwtIssuer
+                  key: JWT__ISSUER
+
             - name: Jwt__Key
               valueFrom:
                 secretKeyRef:
                   name: catalog-api-secret
-                  key: jwtKey
-            - name: Rabbit__Host
+                  key: JWT__KEY
+
+            - name: Redis__ConnectionString
               valueFrom:
-                configMapKeyRef:
-                  name: catalog-api-config
-                  key: rabbitHost
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: catalog-api
-spec:
-  type: NodePort
-  selector:
-    app: catalog-api
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8080
-      nodePort: 30081
+                secretKeyRef:
+                  name: catalog-api-secret
+                  key: REDIS__CONNECTIONSTRING
+
+            - name: Mongodbsql__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: catalog-api-secret
+                  key: MONGODBSQL__CONNECTIONSTRING
+
+            - name: ServiceBus__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: catalog-api-secret
+                  key: SERVICEBUS__CONNECTIONSTRING
+
+            - name: ApplicationInsights__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: catalog-api-secret
+                  key: APPLICATIONINSIGHTS__CONNECTIONSTRING
+
+          # ✅ Rolling update “de verdade”: só troca quando estiver pronto
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 6
+
+          # ✅ Se travar, reinicia
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 25
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
