@@ -1,8 +1,4 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.SignalR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FCG.Catalog.Application.UseCases.Feature.Game.Commands.AddGameLibrary
 {
