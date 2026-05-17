@@ -1,6 +1,10 @@
+using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
 using FCG.Catalog.Application.Interface.Repository;
+using FCG.Catalog.Application.Interface.Service;
 using FCG.Catalog.Application.UseCases.Interceptor;
 using FCG.Catalog.Application.UseCases.Registration;
+using FCG.Catalog.Application.UseCases.Service;
 using FCG.Catalog.Infrastructure.Context;
 using FCG.Catalog.Infrastructure.Repository;
 using FCG.Catalog.WebAPI.Configurations;
@@ -8,6 +12,7 @@ using FCG.Catalog.WebAPI.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Driver;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,7 +43,15 @@ builder.Services.AddOpenApiDocument(options =>
 
 var sqlConn = builder.Configuration.GetConnectionString("ConnectionStrings");
 builder.Services.AddApplicationServices(builder.Configuration);
+
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var connectionString = builder.Configuration["Mongodbsql:ConnectionString"];
+    return new MongoClient(connectionString);
+});
+builder.Services.AddSingleton<MongoAuditService>();
 builder.Services.AddScoped<AuditInterceptor>();
+
 builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 {
     options.UseSqlServer(sqlConn);
@@ -79,6 +92,29 @@ builder.Services.AddScoped<IGenderRepository, GenderRepository>();
 builder.Services.AddScoped<IUserGameRepository, UserGameRepository>();
 #endregion
 
+#region Elastic
+var elasticSettings =
+    new ElasticsearchClientSettings(
+        new Uri(builder.Configuration["Elastic:Url"])
+    )
+    .Authentication(
+        new BasicAuthentication(
+            builder.Configuration["Elastic:Usuario"],
+            builder.Configuration["Elastic:Senha"]
+        )
+    )
+    .DefaultIndex("games");
+
+builder.Services.AddSingleton(
+    new ElasticsearchClient(elasticSettings)
+);
+
+builder.Services.AddScoped<
+    IGameSearchService,
+    GameSearchService>();
+
+#endregion
+
 builder.Services.AddProblemDetails();
 
 builder.Services.AddAuthorization(options =>
@@ -92,8 +128,8 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
 //{
-    app.UseOpenApi();
-    app.UseSwaggerUI();
+app.UseOpenApi();
+app.UseSwaggerUI();
 //}
 
 app.UseHttpsRedirection();
@@ -112,6 +148,9 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
+
+    var elastic = scope.ServiceProvider.GetRequiredService<IGameSearchService>();
+    await elastic.CreateIndexAsync();
 }
 
 app.Run();

@@ -6,14 +6,11 @@ using FCG.Catalog.Application.UseCases.Service;
 using FluentValidation;
 using MassTransit;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
+using StackExchange.Redis;
 using System.Net.Http.Headers;
 using System.Reflection;
-using System.Text;
 
 namespace FCG.Catalog.Application.UseCases.Registration
 {
@@ -27,6 +24,7 @@ namespace FCG.Catalog.Application.UseCases.Registration
             services.AddHttpContextAccessor();
             services.AddScoped<IUserService, UserService>();
             services.AddTransient<AuthenticationHandler>();
+            services.AddSingleton<ICacheService, CacheService>();
 
             // HttpClient configurado
             services.AddHttpClient<UserApiService>(client =>
@@ -56,6 +54,22 @@ namespace FCG.Catalog.Application.UseCases.Registration
                         e.ConfigureConsumer<PaymentProcessConsumer>(context);
                     });
                 });
+            });
+
+            services.AddSingleton<IConnectionMultiplexer>(sp =>
+            {
+                var configurationRedis = configuration["Redis:ConnectionString"];
+
+                var options = ConfigurationOptions.Parse(configurationRedis);
+
+                options.ConnectTimeout = 30000;
+                options.SyncTimeout = 30000;
+                options.AbortOnConnectFail = false;
+
+                options.Ssl = true;
+                options.ReconnectRetryPolicy = new ExponentialRetry(5000);
+
+                return ConnectionMultiplexer.Connect(options);
             });
 
             return services;
