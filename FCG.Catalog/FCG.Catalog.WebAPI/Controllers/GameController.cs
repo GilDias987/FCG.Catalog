@@ -15,7 +15,7 @@ namespace FCG.Catalog.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class GameController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -33,7 +33,7 @@ namespace FCG.Catalog.WebAPI.Controllers
         /// <param name="addGameCommand"></param>
         /// <returns></returns>
         [HttpPost("Insert")]
-        //[Authorize(Policy = "ADMINISTRADOR")]
+        [Authorize(Policy = "ADMINISTRADOR")]
         public async Task<IActionResult> IncluirGame(AddGameCommand addGameCommand)
         {
             _logger.LogInformation("Iniciando inclusão de novo jogo: {GameTitle}", addGameCommand.Title);
@@ -170,6 +170,7 @@ namespace FCG.Catalog.WebAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("GetAdvancedGameSearch")]
+        [Authorize]
         public async Task<IActionResult> GetAdvancedGameSearch([FromBody] GetAdvancedGameQuery getAdvancedGameQuery)
         {
             _logger.LogInformation("Busca avançada de jogos");
