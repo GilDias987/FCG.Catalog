@@ -1,15 +1,24 @@
 ﻿using FCG.Catalog.Application.Interface.Service;
+using FCG.Catalog.Application.UseCases.Service;
+using FCG.Catalog.Domain.Documents;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace FCG.Catalog.Application.UseCases.Interceptor
 {
     public class AuditInterceptor : SaveChangesInterceptor
     {
+        private readonly MongoAuditService _auditService;
         private readonly IUserService _userService;
 
-        public AuditInterceptor(IUserService userService)
+        private readonly List<(EntityEntry Entry, AuditDocument Audit)> _pendingAudits = [];
+
+        public AuditInterceptor(
+            MongoAuditService auditService,
+            IUserService userService)
         {
+            _auditService = auditService;
             _userService = userService;
         }
 
@@ -18,74 +27,90 @@ namespace FCG.Catalog.Application.UseCases.Interceptor
             InterceptionResult<int> result,
             CancellationToken cancellationToken = default)
         {
-            AddAuditLogs(eventData.Context);
-            return base.SavingChangesAsync(eventData, result, cancellationToken);
+            var context = eventData.Context;
+
+            if (context == null)
+                return base.SavingChangesAsync(eventData, result, cancellationToken);
+
+            var entries = context.ChangeTracker.Entries()
+                .Where(x =>
+                    x.State == EntityState.Modified ||
+                    x.State == EntityState.Added ||
+                    x.State == EntityState.Deleted);
+
+            foreach (var entry in entries)
+            {
+                var audit = CreateAudit(entry);
+
+                _pendingAudits.Add((entry, audit));
+            }
+
+            return base.SavingChangesAsync(
+                eventData,
+                result,
+                cancellationToken);
         }
 
-        private void AddAuditLogs(DbContext context)
+        public override async ValueTask<int> SavedChangesAsync(
+            SaveChangesCompletedEventData eventData,
+            int result,
+            CancellationToken cancellationToken = default)
         {
-            //if (context == null) return;
+            foreach (var (entry, audit) in _pendingAudits)
+            {
+                // agora o ID já existe
+                audit.RecordId = entry.Properties
+                    .FirstOrDefault(p => p.Metadata.IsPrimaryKey())
+                    ?.CurrentValue
+                    ?.ToString() ?? string.Empty;
 
-            //var auditLogs = new List<AuditLog>();
+                await _auditService.SaveAsync(audit);
+            }
 
-            //foreach (var entry in context.ChangeTracker.Entries())
-            //{
-            //    if (entry.Entity is AuditLog ||
-            //        entry.State == EntityState.Detached ||
-            //        entry.State == EntityState.Unchanged)
-            //        continue;
+            _pendingAudits.Clear();
 
-            //    var audit = new AuditLog
-            //    {
-            //        TableName = entry.Metadata.GetTableName(),
-            //        Action = entry.State.ToString(),
-            //        Timestamp = DateTime.UtcNow,
-            //        UserId = _userService.GetUserId()
-            //    };
+            return await base.SavedChangesAsync(
+                eventData,
+                result,
+                cancellationToken);
+        }
 
-            //    var keyValues = new Dictionary<string, object>();
-            //    var oldValues = new Dictionary<string, object>();
-            //    var newValues = new Dictionary<string, object>();
+        private AuditDocument CreateAudit(EntityEntry entry)
+        {
+            var changes = new Dictionary<string, AuditChange>();
 
-            //    foreach (var prop in entry.Properties)
-            //    {
-            //        var name = prop.Metadata.Name;
+            foreach (var property in entry.Properties)
+            {
+                if (property.Metadata.IsPrimaryKey())
+                    continue;
 
-            //        if (prop.Metadata.IsPrimaryKey())
-            //        {
-            //            keyValues[name] = prop.CurrentValue;
-            //            audit.EntityId = prop.CurrentValue?.ToString();
-            //            continue;
-            //        }
+                changes[property.Metadata.Name] = new AuditChange
+                {
+                    Old = entry.State == EntityState.Added
+                        ? null
+                        : property.OriginalValue,
 
-            //        switch (entry.State)
-            //        {
-            //            case EntityState.Added:
-            //                newValues[name] = prop.CurrentValue;
-            //                break;
+                    New = entry.State == EntityState.Deleted
+                        ? null
+                        : property.CurrentValue
+                };
+            }
 
-            //            case EntityState.Deleted:
-            //                oldValues[name] = prop.OriginalValue;
-            //                break;
+            return new AuditDocument
+            {
+                Table = entry.Metadata.GetTableName() ?? string.Empty,
 
-            //            case EntityState.Modified:
-            //                if (prop.IsModified)
-            //                {
-            //                    oldValues[name] = prop.OriginalValue;
-            //                    newValues[name] = prop.CurrentValue;
-            //                }
-            //                break;
-            //        }
-            //    }
+                Action = entry.State.ToString(),
 
-            //    audit.KeyValues = JsonSerializer.Serialize(keyValues);
-            //    audit.OldValues = JsonSerializer.Serialize(oldValues);
-            //    audit.NewValues = JsonSerializer.Serialize(newValues);
+                TimestampUtc = DateTime.UtcNow,
 
-            //    auditLogs.Add(audit);
-            //}
+                Changes = changes,
 
-            //context.Set<AuditLog>().AddRange(auditLogs);
+                User = new AuditUser
+                {
+                    Id = _userService.GetUserId(),
+                }
+            };
         }
     }
 }

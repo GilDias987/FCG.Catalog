@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FCG.Catalog.Application.Dto\FCG.Catalog.Application.Dto.csproj" />
     <ProjectReference Include="..\FCG.Catalog.Domain\FCG.Catalog.Domain.csproj" />
   </ItemGroup>
 
