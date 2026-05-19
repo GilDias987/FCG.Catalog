@@ -8,22 +8,28 @@ namespace FCG.Catalog.Application.UseCases.Feature.Game.Commands.DeleteGame
     {
         private readonly IGameRepository _gameRepository;
         private readonly IGameSearchService _gameSearchService;
+        private readonly ICacheService _cacheService;
 
-        public DeleteGameCommandHandler(IGameRepository gameRepository, IGameSearchService gameSearchService)
+        private const string CacheKey = "games:all";
+
+        public DeleteGameCommandHandler(IGameRepository gameRepository, IGameSearchService gameSearchService, ICacheService cacheService)
         {
             _gameRepository = gameRepository;
             _gameSearchService = gameSearchService;
+            _cacheService = cacheService;
         }
 
         public async Task<bool> Handle(DeleteGameCommand request, CancellationToken cancellationToken)
         {
-            var repGame = await _gameRepository.GetByIdAsync(request.Id);
-
-
+            var repGame  = await _gameRepository.GetByIdAsync(request.Id);
             if (repGame != null)
             {
                 await _gameRepository.DeleteAsync(repGame.Id);
                 await _gameSearchService.DeleteAsync(request.Id.ToString());
+
+                // Remover cache Redis.
+                await _cacheService.RemoveAsync(CacheKey);
+
                 return true;
             }
             else

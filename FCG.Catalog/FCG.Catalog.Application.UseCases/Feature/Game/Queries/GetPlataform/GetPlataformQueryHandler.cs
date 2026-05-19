@@ -1,9 +1,6 @@
 ﻿using FCG.Catalog.Application.Dto.Game;
 using FCG.Catalog.Application.Interface.Repository;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FCG.Catalog.Application.UseCases.Feature.Game.Queries.GetPlataform
 {
@@ -24,7 +21,11 @@ namespace FCG.Catalog.Application.UseCases.Feature.Game.Queries.GetPlataform
                 throw new ArgumentException("Plataforma não encontrada.");
             }
 
-            return new PlataformDto { Id = plataform.Id, Title = plataform.Title };
+            return new PlataformDto 
+            { 
+                Id    = plataform.Id, 
+                Title = plataform.Title 
+            };
         }
     }
 }

@@ -1,9 +1,7 @@
 ﻿using FCG.Catalog.Application.Dto.Game;
 using FCG.Catalog.Application.Interface.Repository;
+using FCG.Catalog.Application.Interface.Service;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FCG.Catalog.Application.UseCases.Feature.Game.Commands.AddGender
 {
@@ -11,10 +9,14 @@ namespace FCG.Catalog.Application.UseCases.Feature.Game.Commands.AddGender
     public class AddGenderCommandHandler : IRequestHandler<AddGenderCommand, GenderDto>
     {
         private readonly IGenderRepository _genderRepository;
+        private readonly ICacheService _cacheService;
 
-        public AddGenderCommandHandler(IGenderRepository genderRepository)
+        private const string CacheKey = "genders:all";
+
+        public AddGenderCommandHandler(IGenderRepository genderRepository, ICacheService cacheService)
         {
             _genderRepository = genderRepository;
+            _cacheService = cacheService;
         }
 
         public async Task<GenderDto> Handle(AddGenderCommand request, CancellationToken cancellationToken)
@@ -22,7 +24,15 @@ namespace FCG.Catalog.Application.UseCases.Feature.Game.Commands.AddGender
             try
             {
                 var objGender = await _genderRepository.AddAsync(new Domain.Entities.Gender(request.Title));
-                return new GenderDto() { Id = objGender.Id, Title = objGender.Title };
+
+                // Remover cache Redis.
+                await _cacheService.RemoveAsync(CacheKey);
+
+                return new GenderDto() 
+                { 
+                    Id    = objGender.Id, 
+                    Title = objGender.Title 
+                };
             }
             catch (Exception)
             {
