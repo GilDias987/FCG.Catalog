@@ -9,34 +9,38 @@ namespace FCG.Catalog.Application.UseCases.Feature.Game.Commands.EditGame
     public class EditGameCommandHandler : IRequestHandler<EditGameCommand, GameDto>
     {
         private readonly IGameRepository _gameRepository;
-        private readonly IGenderRepository _genderRepository;
-        private readonly IPlataformRepository _plataformRepository;
         private readonly IGameSearchService _gameSearchService;
+        private readonly ICacheService _cacheService;
 
-        public EditGameCommandHandler(IGameRepository gameRepository, IGenderRepository genderRepository, IPlataformRepository plataformRepository, IGameSearchService gameSearchService)
+        private const string CacheKey = "games:all";
+
+        public EditGameCommandHandler(IGameRepository gameRepository, IGameSearchService gameSearchService, ICacheService cacheService)
         {
             _gameRepository = gameRepository;
-            _genderRepository = genderRepository;
-            _plataformRepository = plataformRepository;
             _gameSearchService = gameSearchService;
+            _cacheService = cacheService;
         }
 
         public async Task<GameDto> Handle(EditGameCommand request, CancellationToken cancellationToken)
         {
             var objGame = await _gameRepository.GetByIdAsync(request.Id);
-            objGame.Initialize(request.TiTle, request.Description, request.Price, request.Discount, request.GenderId, request.PlataformId);
+                objGame.Initialize(request.TiTle, request.Description!, request.Price, request.Discount, request.GenderId, request.PlataformId);
+
             await _gameRepository.UpdateAsync(objGame);
             await _gameSearchService.UpdateAsync(objGame.ToDocument());
 
+            // Remover cache Redis.
+            await _cacheService.RemoveAsync(CacheKey);
+
             var dtoGame = new GameDto()
             {
-                Id = objGame.Id,
-                Title = objGame.Title,
-                Description = objGame.Description,
-                Price = objGame.Price,
-                Discount = objGame.Discount,
-                GenderId = objGame.GenderId,
-                PlataformId = objGame.PlataformId,
+                Id            = objGame.Id,
+                Title         = objGame.Title,
+                Description   = objGame.Description,
+                Price         = objGame.Price,
+                Discount      = objGame.Discount,
+                GenderId      = objGame.GenderId,
+                PlataformId   = objGame.PlataformId,
                 PriceDiscount = objGame.CalculatePriceWithDiscount().ToString("N2")
             };
 
