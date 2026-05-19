@@ -100,6 +100,30 @@ spec:
                   name: catalog-api-secret
                   key: APPLICATIONINSIGHTS__CONNECTIONSTRING
 
+            - name: Elastic__Url
+              valueFrom:
+                secretKeyRef:
+                  name: catalog-api-secret
+                  key: ELASTIC__URL
+
+            - name: Elastic__Usuario
+              valueFrom:
+                secretKeyRef:
+                  name: catalog-api-secret
+                  key: ELASTIC__USUARIO
+
+            - name: Elastic__Senha
+              valueFrom:
+                secretKeyRef:
+                  name: catalog-api-secret
+                  key: ELASTIC__SENHA
+
+            - name: Api_User
+              valueFrom:
+                secretKeyRef:
+                  name: catalog-api-secret
+                  key: API__USER
+
           # ✅ Rolling update “de verdade”: só troca quando estiver pronto
           readinessProbe:
             httpGet:
