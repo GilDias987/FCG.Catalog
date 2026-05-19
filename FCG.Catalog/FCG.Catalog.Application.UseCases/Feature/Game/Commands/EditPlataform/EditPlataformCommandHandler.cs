@@ -1,19 +1,21 @@
 ﻿using FCG.Catalog.Application.Dto.Game;
 using FCG.Catalog.Application.Interface.Repository;
+using FCG.Catalog.Application.Interface.Service;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FCG.Catalog.Application.UseCases.Feature.Game.Commands.EditPlataform
 {
     public class EditPlataformCommandHandler : IRequestHandler<EditPlataformCommand, PlataformDto>
     {
         private readonly IPlataformRepository _plataformRepository;
+        private readonly ICacheService _cacheService;
 
-        public EditPlataformCommandHandler(IPlataformRepository plataformRepository)
+        private const string CacheKey = "plataforms:all";
+
+        public EditPlataformCommandHandler(IPlataformRepository plataformRepository, ICacheService cacheService)
         {
             _plataformRepository = plataformRepository;
+            _cacheService = cacheService;
         }
 
         public async Task<PlataformDto> Handle(EditPlataformCommand request, CancellationToken cancellationToken)
@@ -26,6 +28,9 @@ namespace FCG.Catalog.Application.UseCases.Feature.Game.Commands.EditPlataform
                     plataform.Initialize(request.Title);
 
                     await _plataformRepository.UpdateAsync(plataform);
+
+                    // Remover cache Redis.
+                    await _cacheService.RemoveAsync(CacheKey);
 
                     return new PlataformDto() { Id = plataform.Id, Title = plataform.Title };
                 }

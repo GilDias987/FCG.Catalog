@@ -1,10 +1,6 @@
 ﻿using FCG.Catalog.Application.Dto.Game;
 using FCG.Catalog.Application.Interface.Repository;
-using FCG.Catalog.Application.UseCases.Feature.Game.Queries.GetGame;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FCG.Catalog.Application.UseCases.Feature.Game.Queries.GetGender
 {
@@ -25,7 +21,11 @@ namespace FCG.Catalog.Application.UseCases.Feature.Game.Queries.GetGender
                 throw new ArgumentException("Gênero não encontrado.");
             }
 
-            return new GenderDto { Id = gender.Id, Title = gender.Title };
+            return new GenderDto 
+            { 
+                Id    = gender.Id, 
+                Title = gender.Title 
+            };
         }
     }
 }
