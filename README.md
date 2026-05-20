@@ -7,7 +7,7 @@ Responsável pelo gerenciamento do acervo de jogos, biblioteca dos usuários e p
 * Gerenciamento da biblioteca de jogos por usuário.
 * Início do fluxo de compra de um jogo.
 * Na listagem de games, gênero e Plataforma, foi implementado o `Redis` para cache, visando a redução da latência no banco de dados.
-* A listagem de jogos agora conta com o Elasticsearch, melhorando a eficiência e a precisão das buscas por meio de indexação e análise de dados.
+* A listagem de games agora conta com o `Elasticsearch`, melhorando a eficiência e a precisão das buscas por meio de indexação e análise de dados.
 
 ## 2. Fluxo Orientado a Eventos
 Este serviço é o ponto central da orquestração de pedidos.
