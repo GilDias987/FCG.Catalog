@@ -184,6 +184,14 @@ Para que a aplicação funcione corretamente, edite o arquivo `appsettings.Devel
   "ApplicationInsights": {
     "ConnectionString": "{CONEXAO_LOG}"
   },
+  "Elastic": {
+    "Url": "http://localhost:9200",
+    "Usuario": "elastic",
+    "Senha": "{ELASTIC_SENHA}"
+  },
+  "Api": {
+    "User": "https://localhost:7116/"
+  },
   "AllowedHosts": "*"
 }
 ```
